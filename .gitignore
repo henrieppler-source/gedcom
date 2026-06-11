@@ -18,3 +18,4 @@ node_modules/
 # Temporary files
 *.tmp
 *.log
+gedcom.db
