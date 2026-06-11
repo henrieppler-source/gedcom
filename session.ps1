@@ -3,9 +3,17 @@ param(
     [string]$Phrase
 )
 
+if (-not $Phrase -and $args.Count -gt 0) {
+    $Phrase = $args -join ' '
+}
+
 # Arbeiten aus dem Repository-Stamm aus
 $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $repoRoot
+
+Write-Host "Phrase raw: [$Phrase]"
+Write-Host "Phrase length: $($Phrase.Length)"
+Write-Host "Phrase chars: $([string]::Join(', ', ($Phrase.ToCharArray() | ForEach-Object { [int]$_ })))"
 
 $docPath = Join-Path $repoRoot 'ARBEITSDOKUMENTATION.md'
 
@@ -63,9 +71,22 @@ function Check-GitConfig {
     }
 }
 
-$normalized = ($Phrase -replace '[^\p{L}\p{N}\s-]', '').ToLower().Trim() -replace '\s+', ' '
+$normalized = $Phrase.ToLower().Trim()
+$normalizedKey = $normalized.Replace([string][char]0x00FC, 'ue')
+$normalizedKey = $normalizedKey.Replace(([string][char]0x00C3 + [string][char]0x00BC), 'ue')
 
-switch ($normalized) {
+switch ($normalizedKey) {
+    'fertig fuer heute' {
+        Append-Entry -Status 'Fertig fuer heute' -Text 'Arbeitsende dokumentiert. Aenderungen werden gepusht.'
+        try {
+            Check-GitConfig
+            Git-CommitPush -Message 'Arbeitsdokumentation: fertig fuer heute'
+            Write-Host 'Dokumentation aktualisiert und gepusht.' -ForegroundColor Green
+        } catch {
+            Write-Error "$($_.Exception.Message)"
+        }
+        break
+    }
     'fertig für heute' {
         Append-Entry -Status 'Fertig für heute' -Text 'Arbeitsende dokumentiert. Änderungen werden gepusht.'
         try {
