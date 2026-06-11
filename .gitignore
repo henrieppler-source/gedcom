@@ -1,0 +1,20 @@
+# Visual Studio / general
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Node
+node_modules/
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
